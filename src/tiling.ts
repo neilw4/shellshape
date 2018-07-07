@@ -57,7 +57,7 @@ module Tiling {
 	export var STOP = '_stop_iter';
 
 	export var ArrayUtil = {
-		divide_after: function(num, items) {
+		divide_after: function<T>(num, items: T[]): [T[], T[]] {
 			return [items.slice(0, num), items.slice(num)];
 		},
 
@@ -525,7 +525,7 @@ module Tiling {
 			});
 		}
 
-		for_layout() {
+		for_layout(): WindowTile.BaseTiledWindow[] {
 			// log.debug("tiles = #{@items}, filtered = #{@filter(@is_tiled, @items)}")
 			return this.filter(this.is_tiled, this.items);
 		}
@@ -654,14 +654,9 @@ module Tiling {
 		}
 	}
 
-	// TODO remove
-	export interface MinorSplitState {
-		left: Split[]
-		right: Split[]
-	}
-
 	export interface SplitState {
 		main: MultiSplit
+		// TODO stop assuming 2 splits
 		splits: [Split[], Split[]]
 	}
 
@@ -682,21 +677,22 @@ module Tiling {
 			this.primary_windows = primary_windows;
 		}
 	
-		split(bounds: Bounds, windows, padding) {
-			var left_rect, left_windows, right_rect, right_windows, _ref, _ref1, _ref2;
+		split(bounds: Bounds, windows: WindowTile.BaseTiledWindow[], padding: number): [[Bounds, WindowTile.BaseTiledWindow[]], [Bounds, WindowTile.BaseTiledWindow[]]] {
+			var left_rect, left_windows, right_rect, right_windows;
 			this.save_last_rect(bounds);
 			// log.debug("mainsplit: dividing #{windows.length} after #{@primary_windows} for bounds #{j bounds}")
-			_ref = this.partition_windows(windows), left_windows = _ref[0], right_windows = _ref[1];
+			[left_windows, right_windows] = this.partition_windows(windows)
 			if (left_windows.length > 0 && right_windows.length > 0) {
-				_ref1 = Tile.split_rect(bounds, this.axis, this.ratio, padding), left_rect = _ref1[0], right_rect = _ref1[1];
+				[left_rect, right_rect] = Tile.split_rect(bounds, this.axis, this.ratio, padding)
 			} else {
-				// only one side wil actually be laid out...
-				_ref2 = [bounds, bounds], left_rect = _ref2[0], right_rect = _ref2[1];
+				// only one side will actually be laid out...
+				[left_rect, right_rect] = [bounds, bounds]
 			}
+			// TODO return any size array
 			return [[left_rect, left_windows], [right_rect, right_windows]];
 		}
 	
-		partition_windows(windows) {
+		partition_windows(windows): [WindowTile.BaseTiledWindow[], WindowTile.BaseTiledWindow[]] {
 			return ArrayUtil.divide_after(this.primary_windows, windows);
 		}
 	
