@@ -1,6 +1,8 @@
 /// <reference path="common.ts" />
 /// <reference path="logging.ts" />
 
+/* tslint:enable:typedef */
+
 function noop() { };
 
 module Tiling {
@@ -27,7 +29,7 @@ module Tiling {
 	}
 
 	export interface Bounds extends Rect {
-		update(newMonitor?:any):void
+		update(newMonitor?):void
 	}
 
 	interface IndexedTiledWindow {
@@ -320,7 +322,7 @@ module Tiling {
 		private sorted_with_indexes():IndexedTiledWindow[] {
 			var self = this;
 			var items_and_indexes:IndexedTiledWindow[] = [];
-			var ts = function(this:any) {
+			var ts = function(this) {
 				return "" + this.item + "@" + this.index;
 			};
 
@@ -652,6 +654,7 @@ module Tiling {
 		}
 	}
 
+	// TODO remove
 	export interface MinorSplitState {
 		left: Split[]
 		right: Split[]
@@ -659,7 +662,7 @@ module Tiling {
 
 	export interface SplitState {
 		main: MultiSplit
-		minor: MinorSplitState
+		splits: [Split[], Split[]]
 	}
 
 	export interface SplitStates {
@@ -679,7 +682,7 @@ module Tiling {
 			this.primary_windows = primary_windows;
 		}
 	
-		split(bounds, windows, padding):any[][] {
+		split(bounds: Bounds, windows, padding) {
 			var left_rect, left_windows, right_rect, right_windows, _ref, _ref1, _ref2;
 			this.save_last_rect(bounds);
 			// log.debug("mainsplit: dividing #{windows.length} after #{@primary_windows} for bounds #{j bounds}")

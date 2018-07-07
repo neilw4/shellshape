@@ -1,4 +1,8 @@
 /// <reference path="common.ts" />
+/// <reference path="layout.ts" />
+/// <reference path="util.ts" />
+/// <reference path="extension_impl.ts" />
+
 module Indicator {
 	var Lang: Lang = imports.lang;
 	var PanelMenu = imports.ui.panelMenu;

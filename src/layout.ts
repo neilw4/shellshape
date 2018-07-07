@@ -1,6 +1,9 @@
 /// <reference path="common.ts" />
 /// <reference path="logging.ts" />
 /// <reference path="tiling.ts" />
+/// <reference path="window_tile.ts" />
+
+/* tslint:enable:typedef */
 
 module Layout {
 	// bind useful utils from tiling
@@ -22,17 +25,12 @@ module Layout {
 			this.splits = {
 				'x': {
 					main: new Tiling.MultiSplit('x', 1),
-					minor: {
-						left: [],
-						right: []
-					}
+					// TODO change to dynamically expanding []
+					splits: [[], []] as [Tiling.Split[], Tiling.Split[]]
 				},
 				'y': {
 					main: new Tiling.MultiSplit('y', 1),
-					minor: {
-						left: [],
-						right: []
-					}
+					splits: [[], []] as [Tiling.Split[], Tiling.Split[]]
 				}
 			};
 		}
@@ -291,14 +289,14 @@ module Layout {
 	
 	export abstract class BaseTiledLayout extends BaseLayout {
 		main_split: Tiling.MultiSplit
-		splits: Tiling.MinorSplitState
+		splits: [Tiling.Split[], Tiling.Split[]]
 		main_axis: string
 
 		constructor(name, axis, state:LayoutState) {
 			super(name, state);
 			this.main_axis = axis;
 			this.main_split = state.splits[this.main_axis].main;
-			this.splits = state.splits[this.main_axis].minor;
+			this.splits = state.splits[this.main_axis].splits;
 		}
 
 		protected create_tile(win: Tiling.Window, state: LayoutState) {
@@ -323,8 +321,9 @@ module Layout {
 			var right = _ref[1];
 
 			// @log.debug("split screen into rect #{j left[0]} | #{j right[0]}")
-			this._layout_side.apply(this, left.concat( [this.splits.left,  accommodate_window, padding]));
-			this._layout_side.apply(this, right.concat([this.splits.right, accommodate_window, padding]));
+			// TODO stop assuming size of this.splits is 2
+			this._layout_side.apply(this, left.concat([this.splits[0],  accommodate_window, padding]));
+			this._layout_side.apply(this, right.concat([this.splits[1], accommodate_window, padding]));
 		}
 	
 		_layout_side(rect, windows, splits, accommodate_window, padding) {
