@@ -1,4 +1,3 @@
+/gjs
 /node
 /xbrowser
-/gjs/*.js
-!/gjs/extension.js
