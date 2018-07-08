@@ -289,7 +289,7 @@ module Layout {
 	
 	export abstract class BaseTiledLayout extends BaseLayout {
 		main_split: Tiling.MultiSplit
-		splits: [Tiling.Split[], Tiling.Split[]]
+		splits: [Tiling.Split[]] | [Tiling.Split[], Tiling.Split[]]
 		main_axis: string
 
 		constructor(name, axis, state:LayoutState) {
@@ -316,15 +316,15 @@ module Layout {
 				this._change_main_ratio_to_accommodate(accommodate_window, this.main_split);
 			}
 
-			var [[left_bounds, left_window], [right_bounds, right_window]] = this.main_split.split(this.bounds, layout_windows, padding)
-
-			// @log.debug("split screen into rect #{j left[0]} | #{j right[0]}")
-			// TODO stop assuming size of this.splits is 2
-			this._layout_side(left_bounds, left_window, this.splits[0], padding, accommodate_window)
-			this._layout_side(right_bounds, right_window, this.splits[1], padding, accommodate_window)
+			var new_splits = this.main_split.split(this.bounds, layout_windows, padding)
+			// TODO use this to adjust this.splits length
+			// while (new_splits.length > this.splits.length) {
+			// 	this.splits.push([])
+			// }
+			new_splits.forEach(([bounds, window], idx) => this._layout_side(bounds, window, this.splits[idx], padding, accommodate_window))
 		}
 
-		_layout_side(rect: Tiling.Bounds, windows: WindowTile.BaseTiledWindow[], splits: Tiling.Split[], padding: number, accommodate_window?:WindowTile.BaseTiledWindow) {
+		_layout_side(rect: Tiling.Rect, windows: WindowTile.BaseTiledWindow[], splits: Tiling.Split[], padding: number, accommodate_window?:WindowTile.BaseTiledWindow) {
 			var accommodate_idx, axis, bottom_split, extend_to, other_axis, previous_split, split, top_splits, window, zip, _i, _len, _ref, _ref1, _ref2, _results;
 			axis = Tiling.Axis.other(this.main_axis);
 			extend_to = function(size, array, generator) {

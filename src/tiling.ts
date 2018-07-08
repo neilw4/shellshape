@@ -88,7 +88,7 @@ module Tiling {
 			};
 		}
 
-		static split_rect(rect:Rect, axis:string, ratio:number, padding:number) {
+		static split_rect(rect:Rect, axis:string, ratio:number, padding:number): [Rect, Rect] {
 			var new_rect, new_size_a, new_size_b;
 			// this.log.debug("#split_rect: splitting rect of " + j(rect) + " along the " + axis + " axis with ratio " + ratio);
 			if (ratio > 1 || ratio < 0) {
@@ -656,8 +656,8 @@ module Tiling {
 
 	export interface SplitState {
 		main: MultiSplit
-		// TODO stop assuming 2 splits
-		splits: [Split[], Split[]]
+		// TODO stop assuming 1 or 2 splits
+		splits: [Split[]] | [Split[], Split[]]
 	}
 
 	export interface SplitStates {
@@ -669,6 +669,8 @@ module Tiling {
 		// a splitter that contains multiple windows on either side,
 		// which is split along @axis (where 'x' is a split
 		// that contains windows to the left and right)
+
+		// number of leftmost windows. If 0, both the leftmost and second-left partition have 1 window. -ve values also supported. 
 		primary_windows: number
 		log = Logging.getLogger("shellshape.tiling.MultiSplit")
 
@@ -677,28 +679,32 @@ module Tiling {
 			this.primary_windows = primary_windows;
 		}
 	
-		split(bounds: Bounds, windows: WindowTile.BaseTiledWindow[], padding: number): [[Bounds, WindowTile.BaseTiledWindow[]], [Bounds, WindowTile.BaseTiledWindow[]]] {
+		split(bounds: Bounds, windows: WindowTile.BaseTiledWindow[], padding: number): [[Rect, WindowTile.BaseTiledWindow[]]] | [[Rect, WindowTile.BaseTiledWindow[]], [Rect, WindowTile.BaseTiledWindow[]]] {
 			var left_rect, left_windows, right_rect, right_windows;
 			this.save_last_rect(bounds);
-			// log.debug("mainsplit: dividing #{windows.length} after #{@primary_windows} for bounds #{j bounds}")
-			[left_windows, right_windows] = this.partition_windows(windows)
-			if (left_windows.length > 0 && right_windows.length > 0) {
-				[left_rect, right_rect] = Tile.split_rect(bounds, this.axis, this.ratio, padding)
+
+			let partitioned_windows = this.partition_windows(windows)
+			// TODO accomodate any number of partitions inc. 0
+			if (partitioned_windows.length == 2) {
+				let [left_rect, right_rect] = Tile.split_rect(bounds, this.axis, this.ratio, padding)
+				return [[left_rect, partitioned_windows[0]], [right_rect, partitioned_windows[1]]]
 			} else {
-				// only one side will actually be laid out...
-				[left_rect, right_rect] = [bounds, bounds]
+				return [[bounds, windows]]
 			}
-			// TODO return any size array
-			return [[left_rect, left_windows], [right_rect, right_windows]];
 		}
-	
-		partition_windows(windows): [WindowTile.BaseTiledWindow[], WindowTile.BaseTiledWindow[]] {
-			return ArrayUtil.divide_after(this.primary_windows, windows);
+
+		partition_windows(windows): [[WindowTile.BaseTiledWindow[]]] | [WindowTile.BaseTiledWindow[], WindowTile.BaseTiledWindow[]] {
+			if (this.primary_windows >= windows.length) {
+				return [windows]
+			} else {
+				return ArrayUtil.divide_after(this.primary_windows, windows);
+			}
 		}
 	
 		in_primary_partition(idx) {
 			// @log.debug("on left? #{idx}, #{@primary_windows} == #{idx < @primary_windows}")
-			return idx < this.primary_windows;
+			// primary_windows can be negative
+			return idx < this.primary_windows || idx == 0;
 		}
 	}
 	
