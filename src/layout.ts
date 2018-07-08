@@ -401,11 +401,7 @@ module Layout {
 
 	
 		add_main_window_count(i: number) {
-			var updated = this.get_main_window_count() + i;
-			updated = Math.max(0, updated);
-			updated = Math.min(updated, this.tiles.num_tiled());
-			this.main_split.primary_windows = updated;
-			return this.set_main_window_count(updated)
+			return this.set_main_window_count(this.get_main_window_count() + i)
 		}
 
 
