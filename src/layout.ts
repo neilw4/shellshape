@@ -26,11 +26,11 @@ module Layout {
 				'x': {
 					main: new Tiling.MultiSplit('x', 1),
 					// TODO change to dynamically expanding []
-					splits: [[], []] as [Tiling.Split[], Tiling.Split[]]
+					splits: [[]] as [Tiling.Split[]]
 				},
 				'y': {
 					main: new Tiling.MultiSplit('y', 1),
-					splits: [[], []] as [Tiling.Split[], Tiling.Split[]]
+					splits: [[]] as [Tiling.Split[]]
 				}
 			};
 		}
@@ -317,10 +317,9 @@ module Layout {
 			}
 
 			var new_splits = this.main_split.split(this.bounds, layout_windows, padding)
-			// TODO use this to adjust this.splits length
-			// while (new_splits.length > this.splits.length) {
-			// 	this.splits.push([])
-			// }
+			while (new_splits.length > this.splits.length) {
+				this.splits.push([])
+			}
 			new_splits.forEach(([bounds, window], idx) => this._layout_side(bounds, window, this.splits[idx], padding, accommodate_window))
 		}
 
@@ -384,7 +383,7 @@ module Layout {
 			this.main_split.primary_windows = updated;
 			return this.layout();
 		}
-	
+
 		adjust_main_window_area(diff) {
 			this.main_split.adjust_ratio(diff);
 			return this.layout();
