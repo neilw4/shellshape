@@ -225,6 +225,8 @@ module Layout {
 		adjust_splits_to_fit(win:Tiling.Window) { }
 	
 		add_main_window_count(i) { }
+
+		add_partition_count(i) { }
 	
 		adjust_main_window_area(diff) { }
 	
@@ -381,6 +383,16 @@ module Layout {
 			updated = Math.min(updated, this.tiles.num_tiled());
 			this.main_split.primary_windows = updated;
 			return this.layout();
+		}
+
+
+		get_partition_count(): number {
+			return this.main_split.max_partitions;
+		}
+
+		set_partition_count(i: number) {
+			this.main_split.max_partitions = Math.max(1, i)
+			return this.layout()
 		}
 
 		adjust_main_window_area(diff) {

@@ -6,6 +6,8 @@
 		<key type="as" name="adjust-splits-to-fit">            <default>["&lt;Mod4&gt;&lt;Shift&gt;p"]</default><summary>Adjust tile boundaries to fit window</summary><description>Adjust tile boundaries to fit window.</description></key>
 		<key type="as" name="increase-main-window-count">      <default>["&lt;Mod4&gt;comma"]</default><summary>More windows in the master area</summary><description>More windows in the master area.</description></key>
 		<key type="as" name="decrease-main-window-count">      <default>["&lt;Mod4&gt;period"]</default><summary>Less windows in the master area</summary><description>Less windows in the master area.</description></key>
+		<key type="as" name="increase-max-partitions">         <default>["&lt;Mod4&gt;&lt;Shift&gt;period"]</default><summary>More partitions</summary><description>More partitions.</description></key>
+		<key type="as" name="decrease-max-partitions">         <default>["&lt;Mod4&gt;&lt;Shift&gt;comma"]</default><summary>Less w-partitions</summary><description>Less partitions.</description></key>
 
 		<key type="as" name="next-window">                     <default>["&lt;Mod4&gt;j", "&lt;Mod4&gt;Tab"]</default><summary>Change focus to the next window</summary><description>Change focus to the next window.</description></key>
 		<key type="as" name="prev-window">                     <default>["&lt;Mod4&gt;k", "&lt;Mod4&gt;&lt;Shift&gt;Tab"]</default><summary>Change focus to the previous window</summary><description>Change focus to the previous window.</description></key>

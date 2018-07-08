@@ -333,6 +333,8 @@ module Extension {
 				handle('adjust-splits-to-fit',          function() { self.current_layout().adjust_splits_to_fit(self.current_window()); });
 				handle('increase-main-window-count',    function() { self.current_layout().add_main_window_count(1); });
 				handle('decrease-main-window-count',    function() { self.current_layout().add_main_window_count(-1); });
+				handle('increase-max-partitions',    function() { self.current_layout().add_partition_count(1); });
+				handle('decrease-max-partitions',    function() { self.current_layout().add_partition_count(-1); });
 
 				handle('next-window',                   function() { self.current_layout().select_cycle(1); });
 				handle('prev-window',                   function() { self.current_layout().select_cycle(-1); });
