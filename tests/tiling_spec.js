@@ -351,7 +351,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'x', 0.5, 0, 2), [
+    }, 'x', 0, 2), [
       {
         pos: {
           x: 0,
@@ -383,7 +383,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'y', 0.5, 0, 2), [
+    }, 'y', 0, 2), [
       {
         pos: {
           x: 0,
@@ -415,7 +415,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'y', 0.1, 0, 2), [
+    }, 'y', 0, 2, 0.1), [
       {
         pos: {
           x: 0,
@@ -447,7 +447,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'y', 0.5, 10, 2), [
+    }, 'y', 10, 2), [
       {
         pos: {
           x: 0,
@@ -513,7 +513,7 @@ describe('3-way Tile functions', function() {
         x: 120,
         y: 240
       }
-    }, 'x', 0.5, 0, 3), [
+    }, 'x', 0, 3), [
       {
         pos: {
           x: 0,
@@ -554,7 +554,7 @@ describe('3-way Tile functions', function() {
         x: 120,
         y: 240
       }
-    }, 'y', 0.5, 0, 3), [
+    }, 'y', 0, 3), [
       {
         pos: {
           x: 0,
@@ -595,7 +595,7 @@ describe('3-way Tile functions', function() {
         x: 120,
         y: 240
       }
-    }, 'y', 0.1, 0, 3), [
+    }, 'y', 0, 3, 0.1), [
       {
         pos: {
           x: 0,
@@ -636,7 +636,7 @@ describe('3-way Tile functions', function() {
         x: 120,
         y: 240
       }
-    }, 'y', 0.5, 10, 3), [
+    }, 'y', 10, 3), [
       {
         pos: {
           x: 0,
@@ -1058,19 +1058,19 @@ describe('VerticalTiledLayout', function() {
         x: 410,
         y: 0,
         w: 390,
-        h: 290
+        h: 190
       }));
       eq(window3.rect(), to_rect({
         x: 410,
-        y: 310,
+        y: 210,
         w: 390,
-        h: 135
+        h: 190
       }));
       return eq(window4.rect(), to_rect({
         x: 410,
-        y: 465,
+        y: 410,
         w: 390,
-        h: 135
+        h: 190
       }));
     });
   });
@@ -1132,324 +1132,6 @@ describe('VerticalTiledLayout', function() {
         w: 400,
         h: 150
       }));
-    });
-    describe('main_split', function() {
-      it('should adjust split for a resized LHS window', function() {
-        reset();
-        resize(window1, function(rect) {
-          return rect.w = 200;
-        });
-        layout.adjust_splits_to_fit(window1);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 200,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 200,
-          y: 0,
-          w: 600,
-          h: 300
-        }));
-        eq(window3.rect(), to_rect({
-          x: 200,
-          y: 300,
-          w: 600,
-          h: 150
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 200,
-          y: 450,
-          w: 600,
-          h: 150
-        }));
-      });
-      it('should adjust split for a moved and resized LHS window', function() {
-        reset();
-        resize(window1, function(rect) {
-          rect.w = 200;
-          rect.x = 100;
-          rect.y = 50;
-          return rect.h = 500;
-        });
-        layout.adjust_splits_to_fit(window1);
-        eq(window1.rect(), to_rect({
-          x: 100,
-          y: 50,
-          w: 200,
-          h: 500
-        }));
-        eq(window2.rect(), to_rect({
-          x: 300,
-          y: 0,
-          w: 500,
-          h: 300
-        }));
-        eq(window3.rect(), to_rect({
-          x: 300,
-          y: 300,
-          w: 500,
-          h: 150
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 300,
-          y: 450,
-          w: 500,
-          h: 150
-        }));
-      });
-      it('should adjust split for a resized RHS window', function() {
-        reset();
-        resize(window2, function(rect) {
-          rect.x = 600;
-          return rect.w = 200;
-        });
-        layout.adjust_splits_to_fit(window2);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 600,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 600,
-          y: 0,
-          w: 200,
-          h: 300
-        }));
-        eq(window3.rect(), to_rect({
-          x: 600,
-          y: 300,
-          w: 200,
-          h: 150
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 600,
-          y: 450,
-          w: 200,
-          h: 150
-        }));
-      });
-      it('should adjust split for a moved and resized RHS window', function() {
-        reset();
-        resize(window2, function(rect) {
-          rect.x = 500;
-          return rect.w = 200;
-        });
-        layout.adjust_splits_to_fit(window2);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 500,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 500,
-          y: 0,
-          w: 200,
-          h: 300
-        }));
-        eq(window3.rect(), to_rect({
-          x: 500,
-          y: 300,
-          w: 300,
-          h: 150
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 500,
-          y: 450,
-          w: 300,
-          h: 150
-        }));
-      });
-    });
-    describe('minor splits', function() {
-      it('should adjust split for resized initial window', function() {
-        reset();
-        resize(window2, function(rect) {
-          return rect.h = 200;
-        });
-        layout.adjust_splits_to_fit(window2);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 400,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 400,
-          y: 0,
-          w: 400,
-          h: 200
-        }));
-        eq(window3.rect(), to_rect({
-          x: 400,
-          y: 200,
-          w: 400,
-          h: 200
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 400,
-          y: 400,
-          w: 400,
-          h: 200
-        }));
-      });
-      it('should adjust split for resized and moved initial window', function() {
-        reset();
-        resize(window2, function(rect) {
-          rect.y += 100;
-          return rect.h -= 200;
-        });
-        layout.adjust_splits_to_fit(window2);
-        eq(window2.rect(), to_rect({
-          x: 400,
-          y: 100,
-          w: 400,
-          h: 100
-        }));
-        eq(window3.rect(), to_rect({
-          x: 400,
-          y: 200,
-          w: 400,
-          h: 200
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 400,
-          y: 400,
-          w: 400,
-          h: 200
-        }));
-      });
-      it('should adjust single above split for resized second window', function() {
-        reset();
-        resize(window3, function(rect) {
-          rect.y -= 50;
-          return rect.h += 50;
-        });
-        layout.adjust_splits_to_fit(window3);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 400,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 400,
-          y: 0,
-          w: 400,
-          h: 250
-        }));
-        eq(window3.rect(), to_rect({
-          x: 400,
-          y: 250,
-          w: 400,
-          h: 200
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 400,
-          y: 450,
-          w: 400,
-          h: 150
-        }));
-      });
-      it('should adjust single above split and below split for second window resized and moved', function() {
-        reset();
-        resize(window3, function(rect) {
-          rect.y -= 50;
-          return rect.h += 100;
-        });
-        layout.adjust_splits_to_fit(window3);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 400,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 400,
-          y: 0,
-          w: 400,
-          h: 250
-        }));
-        eq(window3.rect(), to_rect({
-          x: 400,
-          y: 250,
-          w: 400,
-          h: 250
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 400,
-          y: 500,
-          w: 400,
-          h: 100
-        }));
-      });
-      it('should adjust multiple above split for resized third window', function() {
-        reset();
-        resize(window4, function(rect) {
-          rect.y -= 100;
-          return rect.h += 100;
-        });
-        layout.adjust_splits_to_fit(window4);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 400,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 400,
-          y: 0,
-          w: 400,
-          h: 233
-        }));
-        eq(window3.rect(), to_rect({
-          x: 400,
-          y: 233,
-          w: 400,
-          h: 117
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 400,
-          y: 350,
-          w: 400,
-          h: 250
-        }));
-      });
-      it('should adjust multiple above splits for resized and moved final window', function() {
-        reset();
-        resize(window4, function(rect) {
-          rect.y -= 100;
-          return rect.h += 50;
-        });
-        layout.adjust_splits_to_fit(window4);
-        eq(window1.rect(), to_rect({
-          x: 0,
-          y: 0,
-          w: 400,
-          h: 600
-        }));
-        eq(window2.rect(), to_rect({
-          x: 400,
-          y: 0,
-          w: 400,
-          h: 233
-        }));
-        eq(window3.rect(), to_rect({
-          x: 400,
-          y: 233,
-          w: 400,
-          h: 117
-        }));
-        return eq(window4.rect(), to_rect({
-          x: 400,
-          y: 350,
-          w: 400,
-          h: 200
-        }));
-      });
     });
   });
 });

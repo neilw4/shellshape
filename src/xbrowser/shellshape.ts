@@ -47,7 +47,6 @@ $(function() {
 					case 74: tiling.cycle(1); break; // j
 					case 75: tiling.cycle(-1); break; // k
 					case 32: tiling.swap_active_with_main(); break; // space
-					case 80: tiling.adjust_splits_to_fit(BrowserWindow.active); break; // p
 					case 188: tiling.add_partition_count(1); break; // , (<)
 					case 190: tiling.add_partition_count(-1); break; // . (>)
 				}

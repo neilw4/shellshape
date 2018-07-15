@@ -330,7 +330,6 @@ module Extension {
 				self.log.debug("adding keyboard handlers for Shellshape");
 				handle('tile-current-window',           function() { self.current_layout().tile(self.current_window())});
 				handle('untile-current-window',         function() { self.current_layout().untile(self.current_window()); });
-				handle('adjust-splits-to-fit',          function() { self.current_layout().adjust_splits_to_fit(self.current_window()); });
 				handle('increase-main-window-count',    function() { self.current_layout().add_main_window_count(1); });
 				handle('decrease-main-window-count',    function() { self.current_layout().add_main_window_count(-1); });
 				handle('increase-max-partitions',    function() { self.current_layout().add_partition_count(1); });

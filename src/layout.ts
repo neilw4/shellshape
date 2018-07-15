@@ -28,14 +28,8 @@ module Layout {
 		constructor(bounds:Tiling.Bounds) {
 			this.bounds = assert(bounds);
 			this.splits = {
-				'x': {
-					main: new Tiling.MultiSplit('x', Default.primary_windows, Default.num_partitions),
-					splits: [[]] as Tiling.Split[][]
-				},
-				'y': {
-					main: new Tiling.MultiSplit('y', Default.primary_windows, Default.num_partitions),
-					splits: [[]] as Tiling.Split[][]
-				}
+				'x': new Tiling.MultiSplit('x', Default.primary_windows, Default.num_partitions),
+				'y': new Tiling.MultiSplit('y', Default.primary_windows, Default.num_partitions),
 			};
 		}
 	
@@ -63,7 +57,7 @@ module Layout {
 			return "[object BaseLayout]";
 		}
 
-		abstract layout(accommodate_window?: WindowTile.BaseTiledWindow):void;
+		abstract layout():void;
 	
 		each(func:IterFunc<WindowTile.BaseTiledWindow>) {
 			return this.tiles.each(func);
@@ -227,8 +221,6 @@ module Layout {
 		
 		on_split_resize_start(win:Tiling.Window) { }
 	
-		adjust_splits_to_fit(win:Tiling.Window) { }
-	
 		get_main_window_count(): number { throw "interface not implemented" }
 
 		set_main_window_count(i: number) { }
@@ -268,7 +260,7 @@ module Layout {
 			return new WindowTile.FloatingWindowTile(win, state);
 		}
 
-		layout(accommodate_window) {}
+		layout() {}
 	}
 
 	export class FloatingLayout extends NonTiledLayout {
@@ -294,7 +286,7 @@ module Layout {
 			return "[object FullScreenLayout]";
 		}
 	
-		layout(accommodate_window) {
+		layout() {
 			this.each_tiled(function(tile) {
 				tile.window.maximize();
 			});
@@ -303,14 +295,12 @@ module Layout {
 	
 	export abstract class BaseTiledLayout extends BaseLayout {
 		main_split: Tiling.MultiSplit
-		splits: Tiling.Split[][]
 		main_axis: string
 
 		constructor(name, axis, state:LayoutState) {
 			super(name, state);
 			this.main_axis = axis;
-			this.main_split = state.splits[this.main_axis].main;
-			this.splits = state.splits[this.main_axis].splits;
+			this.main_split = state.splits[this.main_axis];
 		}
 
 		protected create_tile(win: Tiling.Window, state: LayoutState) {
@@ -321,73 +311,20 @@ module Layout {
 			return "[object BaseTiledLayout]";
 		}
 	
-		layout(accommodate_window?:WindowTile.BaseTiledWindow) {
+		layout() {
 			this.bounds.update();
 			var padding = LayoutState.padding;
 			var layout_windows = this.tiles.for_layout();
 			this.log.debug("laying out " + layout_windows.length + " windows");
-			if (accommodate_window != null) {
-				this._change_main_ratio_to_accommodate(accommodate_window, this.main_split);
-			}
 
 			var new_splits = this.main_split.split(this.bounds, layout_windows, padding)
-			while (new_splits.length > this.splits.length) {
-				this.splits.push([])
-			}
-			new_splits.forEach(([bounds, window], idx) => this._layout_side(bounds, window, this.splits[idx], padding, accommodate_window))
+			new_splits.forEach(([bounds, window], idx) => this._layout_side(bounds, window, padding))
 		}
 
-		_layout_side(rect: Tiling.Rect, windows: WindowTile.BaseTiledWindow[], splits: Tiling.Split[], padding: number, accommodate_window?:WindowTile.BaseTiledWindow) {
-			var accommodate_idx, axis, bottom_split, extend_to, other_axis, previous_split, split, top_splits, window, zip, _i, _len, _ref, _ref1, _ref2, _results;
-			axis = Tiling.Axis.other(this.main_axis);
-			extend_to = function(size, array, generator) {
-				var _results;
-				_results = [];
-				while (array.length < size) {
-					_results.push(array.push(generator()));
-				}
-				return _results;
-			};
-			zip = function(a, b) {
-				var i;
-				return (function() {
-					var _i, _ref, _results;
-					_results = [];
-					for (i = _i = 0, _ref = Math.min(a.length, b.length); 0 <= _ref ? _i < _ref : _i > _ref; i = 0 <= _ref ? ++_i : --_i) {
-						_results.push([a[i], b[i]]);
-					}
-					return _results;
-				})();
-			};
-			extend_to(windows.length, splits, function() {
-				return new Tiling.Split(axis);
-			});
-			// @log.debug("laying out side with rect #{j rect}, windows #{windows.length} and splits #{splits.length}")
-
-			if (accommodate_window != null) {
-				accommodate_idx = windows.indexOf(accommodate_window);
-				if (accommodate_idx !== -1) {
-					top_splits = splits.slice(0, accommodate_idx);
-					bottom_split = splits[accommodate_idx];
-					if (accommodate_idx === windows.length - 1) {
-						bottom_split = void 0;
-					}
-					other_axis = Tiling.Axis.other(this.main_axis);
-					this._change_minor_ratios_to_accommodate(accommodate_window, top_splits, bottom_split);
-				}
-			}
-			previous_split = null;
-			_ref = zip(windows, splits);
-			_results = [];
-			for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-				_ref1 = _ref[_i], window = _ref1[0], split = _ref1[1];
-				window.top_split = previous_split;
-				_ref2 = split.layout_one(rect, windows, padding), rect = _ref2[0], windows = _ref2[1];
-				window.ensure_within(this.bounds);
-				window.bottom_split = windows.length > 0 ? split : null;
-				_results.push(previous_split = split);
-			}
-			return _results;
+		_layout_side(rect: Tiling.Rect, windows: WindowTile.BaseTiledWindow[], padding: number) {
+			var axis = Tiling.Axis.other(this.main_axis);
+			var rects = Tiling.Tile.split_rect(rect, axis, padding, windows.length)
+			Tiling.ArrayUtil.zip(rects, windows).forEach(([rect, window]) => window.set_rect(rect))
 		}
 
 		get_main_window_count(): number {
@@ -504,82 +441,6 @@ module Layout {
 			if(!found) {
 				this.log.warn("override_external_change called for unknown window " + win);
 			}
-		}
-	
-		adjust_splits_to_fit(win) {
-			var self = this;
-			this.managed_tile_for(win, function(tile, idx) {
-				if (!self.tiles.is_tiled(tile)) return;
-				self.layout(tile);
-			});
-		}
-	
-		private _change_main_ratio_to_accommodate(tile, split) {
-			var left, right, _ref;
-			_ref = split.partition_windows(this.tiles.for_layout()), left = _ref[0], right = _ref[1];
-			if (contains(left, tile)) {
-				this.log.debug("LHS adjustment for size: " + (j(tile.offset.size)) + " and pos " + (j(tile.offset.pos)));
-				split.adjust_ratio_px(tile.offset.size[this.main_axis] + tile.offset.pos[this.main_axis]);
-				tile.offset.size[this.main_axis] = -tile.offset.pos[this.main_axis];
-			} else if (contains(right, tile)) {
-				this.log.debug("RHS adjustment for size: " + (j(tile.offset.size)) + " and pos " + (j(tile.offset.pos)));
-				split.adjust_ratio_px(tile.offset.pos[this.main_axis]);
-				tile.offset.size[this.main_axis] += tile.offset.pos[this.main_axis];
-				tile.offset.pos[this.main_axis] = 0;
-			}
-			this.log.debug("After main_split accommodation, tile offset = " + (j(tile.offset)));
-		}
-	
-		_change_minor_ratios_to_accommodate(tile, above_splits, below_split) {
-			var axis, bottom_offset, diff_px, diff_pxes, i, offset, proportion, size_taken, split, split_size, split_sizes, top_offset, total_size_above, _i, _j, _k, _len, _ref, _ref1;
-			offset = tile.offset;
-			axis = Tiling.Axis.other(this.main_axis);
-			top_offset = offset.pos[axis];
-			bottom_offset = offset.size[axis];
-			if (above_splits.length > 0) {
-				// TODO: this algorithm seems needlessly involved. Figure out if there's a cleaner
-				//       way of doing it
-				this.log.debug("ABOVE adjustment for offset: " + (j(offset)) + ", " + top_offset + " diff required across " + above_splits.length);
-				diff_pxes = [];
-				split_sizes = [];
-				total_size_above = 0;
-				for (_i = 0, _len = above_splits.length; _i < _len; _i++) {
-					split = above_splits[_i];
-					split_size = split.last_size * split.ratio;
-					split_sizes.push(split_size);
-					total_size_above += split_size;
-				}
-				for (i = _j = 0, _ref = above_splits.length; 0 <= _ref ? _j < _ref : _j > _ref; i = 0 <= _ref ? ++_j : --_j) {
-					proportion = split_sizes[i] / total_size_above;
-					diff_pxes.push(proportion * top_offset);
-				}
-				this.log.debug("diff pxes for above splits are: " + (j(diff_pxes)));
-				size_taken = 0;
-				for (i = _k = 0, _ref1 = above_splits.length; 0 <= _ref1 ? _k < _ref1 : _k > _ref1; i = 0 <= _ref1 ? ++_k : --_k) {
-					split = above_splits[i];
-					diff_px = diff_pxes[i];
-					split.maintain_split_position_with_rect_difference(-size_taken);
-					size_taken += diff_px;
-					split.adjust_ratio_px(diff_px);
-				}
-				tile.offset.pos[axis] = 0;
-				if (below_split != null) {
-					this.log.debug("MODIFYING bottom to accomodate top_px changes == " + top_offset);
-					// TODO: seems a pretty hacky place to do it..
-					below_split.maintain_split_position_with_rect_difference(-top_offset);
-				} else {
-					tile.offset.size[axis] += top_offset;
-				}
-			} else {
-				bottom_offset += top_offset;
-			}
-			if (below_split != null) {
-				this.log.debug("BELOW adjustment for offset: " + (j(offset)) + ", bottom_offset = " + bottom_offset);
-				this.log.debug("before bottom minor adjustments, offset = " + (j(tile.offset)));
-				below_split.adjust_ratio_px(bottom_offset);
-				tile.offset.size[axis] -= bottom_offset;
-			}
-			this.log.debug("After minor adjustments, offset = " + (j(tile.offset)));
 		}
 	
 		_swap_moved_tile_if_necessary(tile, idx) {

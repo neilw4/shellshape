@@ -96,7 +96,7 @@ module Tiling {
 			};
 		}
 
-		static split_rect(rect:Rect, axis:string, ratio:number, padding:number, partitions: number): Rect[] {
+		static split_rect(rect:Rect, axis:string, padding:number, partitions: number, ratio: number=0.5): Rect[] {
 			var new_rect, new_size_a, new_size_b;
 			// this.log.debug("#split_rect: splitting rect of " + j(rect) + " along the " + axis + " axis with ratio " + ratio);
 			if (ratio > 1 || ratio < 0) {
@@ -628,14 +628,6 @@ module Tiling {
 			this.last_size = rect.size[this.axis];
 		}
 	
-		maintain_split_position_with_rect_difference(diff:number):void {
-			var unwanted_addition;
-			unwanted_addition = this.ratio * diff;
-			this.last_size += diff;
-			this.log.debug("adjusting by " + (-unwanted_addition) + " to accommodate for rect size change from " + (this.last_size - diff) + " to " + this.last_size);
-			this.adjust_ratio_px(-unwanted_addition);
-		}
-	
 		adjust_ratio_px(diff:number) {
 			var current_px, new_px, new_ratio;
 			this.log.debug("adjusting ratio " + this.ratio + " by " + diff + " px");
@@ -656,34 +648,9 @@ module Tiling {
 	
 	}
 
-	
-	export class Split extends BaseSplit {
-		layout_one(rect, windows, padding) {
-			var first_window, remaining, window_rect, _ref;
-			this.save_last_rect(rect);
-			first_window = windows.shift();
-			if (windows.length === 0) {
-				first_window.set_rect(rect);
-				return [{}, []];
-			}
-			_ref = Tile.split_rect(rect, this.axis, this.ratio, padding, 2), window_rect = _ref[0], remaining = _ref[1];
-			first_window.set_rect(window_rect);
-			return [remaining, windows];
-		}
-	
-		toString() {
-			return "Split with ratio " + this.ratio;
-		}
-	}
-
-	export interface SplitState {
-		main: MultiSplit
-		splits: Split[][]
-	}
-
 	export interface SplitStates {
-		x: SplitState
-		y: SplitState
+		x: MultiSplit
+		y: MultiSplit
 	}
 	
 	export class MultiSplit extends BaseSplit {
@@ -707,8 +674,7 @@ module Tiling {
 			this.save_last_rect(bounds);
 
 			let partitioned_windows = this.partition_windows(windows)
-
-			let rects = Tile.split_rect(bounds, this.axis, this.ratio, padding, partitioned_windows.length)
+			let rects = Tile.split_rect(bounds, this.axis, padding, partitioned_windows.length, this.ratio)
 			return ArrayUtil.zip(rects, partitioned_windows)
 		}
 
