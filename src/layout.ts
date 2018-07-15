@@ -13,6 +13,11 @@ module Layout {
 		return arr.indexOf(item) !== -1;
 	};
 
+	export class Default {
+		static primary_windows: number = 1
+		static num_partitions: number = 2
+	}
+
 	export class LayoutState {
 		// shared state for every layout type. Includes distinct @splits
 		// objects for both directions
@@ -24,11 +29,11 @@ module Layout {
 			this.bounds = assert(bounds);
 			this.splits = {
 				'x': {
-					main: new Tiling.MultiSplit('x', 1, 2),
+					main: new Tiling.MultiSplit('x', Default.primary_windows, Default.num_partitions),
 					splits: [[]] as Tiling.Split[][]
 				},
 				'y': {
-					main: new Tiling.MultiSplit('y', 1, 2),
+					main: new Tiling.MultiSplit('y', Default.primary_windows, Default.num_partitions),
 					splits: [[]] as Tiling.Split[][]
 				}
 			};
@@ -224,7 +229,15 @@ module Layout {
 	
 		adjust_splits_to_fit(win:Tiling.Window) { }
 	
+		get_main_window_count(): number { throw "interface not implemented" }
+
+		set_main_window_count(i: number) { }
+
 		add_main_window_count(i) { }
+		
+		get_partition_count(): number { throw "interface not implemented" }
+
+		set_partition_count(i: number) { }
 
 		add_partition_count(i) { }
 	
@@ -376,13 +389,23 @@ module Layout {
 			}
 			return _results;
 		}
+
+		get_main_window_count(): number {
+			return this.main_split.primary_windows;
+		}
+
+		set_main_window_count(i: number) {
+			this.main_split.primary_windows = i;
+			return this.layout()
+		}
+
 	
 		add_main_window_count(i: number) {
-			var updated = this.main_split.primary_windows + i;
+			var updated = this.get_main_window_count() + i;
 			updated = Math.max(0, updated);
 			updated = Math.min(updated, this.tiles.num_tiled());
 			this.main_split.primary_windows = updated;
-			return this.layout();
+			return this.set_main_window_count(updated)
 		}
 
 
@@ -393,6 +416,10 @@ module Layout {
 		set_partition_count(i: number) {
 			this.main_split.max_partitions = Math.max(1, i)
 			return this.layout()
+		}
+
+		add_partition_count(i: number) {
+			return this.set_partition_count(this.get_partition_count() + i);
 		}
 
 		adjust_main_window_area(diff) {

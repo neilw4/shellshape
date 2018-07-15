@@ -216,6 +216,72 @@ function buildPrefsWidget() {
 		});
 	})();
 
+	//default primary windows
+	(function() {
+		var hbox = new Gtk.Box({
+			orientation: Gtk.Orientation.HORIZONTAL,
+			spacing: 20
+		});
+
+		var label = new Gtk.Label({ label: _("Default number of primary windows") });
+		var adjustment = new Gtk.Adjustment({
+			lower: 0,
+			upper: 10,
+			step_increment: 1
+		});
+		var scale = new Gtk.HScale({
+			digits:0,
+			adjustment: adjustment,
+			value_pos: Gtk.PositionType.RIGHT
+		});
+
+		hbox.add(label);
+		hbox.pack_end(scale, true, true, 0);
+		vbox.add(hbox);
+
+		var pref = config.DEFAULT_PRIMARY_WINDOWS;
+		scale.set_value(pref.get());
+		scale.connect('value-changed', function(sw) {
+			var newval = sw.get_value();
+			if (newval != pref.get()) {
+				pref.set(newval);
+			}
+		});
+	})();
+
+	//default number of partitions
+	(function() {
+		var hbox = new Gtk.Box({
+			orientation: Gtk.Orientation.HORIZONTAL,
+			spacing: 20
+		});
+
+		var label = new Gtk.Label({ label: _("Default number of partitions") });
+		var adjustment = new Gtk.Adjustment({
+			lower: 0,
+			upper: 10,
+			step_increment: 1
+		});
+		var scale = new Gtk.HScale({
+			digits:0,
+			adjustment: adjustment,
+			value_pos: Gtk.PositionType.RIGHT
+		});
+
+		hbox.add(label);
+		hbox.pack_end(scale, true, true, 0);
+		vbox.add(hbox);
+
+		var pref = config.DEFAULT_NUM_PARTITIONS;
+		scale.set_value(pref.get());
+		scale.connect('value-changed', function(sw) {
+			var newval = sw.get_value();
+			if (newval != pref.get()) {
+				pref.set(newval);
+			}
+		});
+	})();
+
 
 	var label = new Gtk.HSeparator();
 	vbox.add(label);

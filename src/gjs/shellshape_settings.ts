@@ -139,6 +139,8 @@ module ShellshapeSettings {
 		DEFAULT_LAYOUT: Pref<string>;
 		PADDING: Pref<number>;
 		SCREEN_PADDING: Pref<number>;
+		DEFAULT_PRIMARY_WINDOWS: Pref<number>;
+		DEFAULT_NUM_PARTITIONS: Pref<number>;
 		settings: any;
 
 		constructor() {
@@ -148,6 +150,8 @@ module ShellshapeSettings {
 			this.DEFAULT_LAYOUT = new StringPref('default-layout', settings);
 			this.PADDING = new IntPref('tile-padding', settings);
 			this.SCREEN_PADDING = new IntPref('screen-padding', settings);
+			this.DEFAULT_PRIMARY_WINDOWS = new IntPref('default-primary-windows', settings)
+			this.DEFAULT_NUM_PARTITIONS = new IntPref('default-partition-count', settings)
 		}
 	};
 

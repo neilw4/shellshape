@@ -582,6 +582,28 @@ module Extension {
 					update();
 				})();
 
+				// Default primary windows
+				(function() {
+					var pref = self.prefs.DEFAULT_PRIMARY_WINDOWS;
+					var update = function() {
+						var val = pref.get();
+						Layout.Default.primary_windows = val;
+					};
+					Util.connect_and_track(self, pref.gsettings, 'changed::' + pref.key, update);
+					update();
+				})();
+
+				// Default number of partitions
+				(function() {
+					var pref = self.prefs.DEFAULT_NUM_PARTITIONS;
+					var update = function() {
+						var val = pref.get();
+						Layout.Default.num_partitions = val;
+					};
+					Util.connect_and_track(self, pref.gsettings, 'changed::' + pref.key, update);
+					update();
+				})();
+
 				initial = false;
 			};
 

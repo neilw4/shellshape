@@ -21,6 +21,16 @@
 			<summary>Padding (in px) between layout tiles.</summary>
 			<description/>
 		</key>
+		<key type="i" name="default-primary-windows">
+			<default>1</default>
+			<summary>Default number of primary windows. 0 and negative values are allowed if the screens next to the primary should only have 1 window.</summary>
+			<description/>
+		</key>
+		<key type="i" name="default-partition-count">
+			<default>2</default>
+			<summary>Default number of partitions to use.</summary>
+			<description/>
+		</key>
 		<key type="s" name="default-layout">
 			<choices>
 				<choice value="floating"/>
