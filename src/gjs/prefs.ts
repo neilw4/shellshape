@@ -77,7 +77,7 @@ function buildPrefsWidget() {
 		var label = new Gtk.Label({ label: _("Maximum number of windows to auto-tile:") });
 		var adjustment = new Gtk.Adjustment({
 			lower: 0,
-			upper: 20,
+			upper: 30,
 			step_increment: 1
 		});
 		var scale = new Gtk.HScale({

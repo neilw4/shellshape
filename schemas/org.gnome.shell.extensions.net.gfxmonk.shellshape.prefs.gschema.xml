@@ -7,7 +7,7 @@
 			<description/>
 		</key>
 		<key type="i" name="max-autotiled-windows">
-			<default>5</default>
+			<default>10</default>
 			<summary>Stop auto-tiling new windows when there are this many windows already tiled.</summary>
 			<description/>
 		</key>
