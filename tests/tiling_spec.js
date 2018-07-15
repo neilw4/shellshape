@@ -351,7 +351,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'x', 0.5, 0), [
+    }, 'x', 0.5, 0, 2), [
       {
         pos: {
           x: 0,
@@ -383,7 +383,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'y', 0.5, 0), [
+    }, 'y', 0.5, 0, 2), [
       {
         pos: {
           x: 0,
@@ -415,7 +415,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'y', 0.1, 0), [
+    }, 'y', 0.1, 0, 2), [
       {
         pos: {
           x: 0,
@@ -447,7 +447,7 @@ describe('Basic Tile functions', function() {
         x: 100,
         y: 200
       }
-    }, 'y', 0.5, 10), [
+    }, 'y', 0.5, 10, 2), [
       {
         pos: {
           x: 0,
@@ -498,6 +498,174 @@ describe('Basic Tile functions', function() {
         y: 60
       }
     });
+  });
+});
+
+
+describe('3-way Tile functions', function() {
+  it('should split x', function() {
+    return eq(Tile.split_rect({
+      pos: {
+        x: 0,
+        y: 0
+      },
+      size: {
+        x: 120,
+        y: 240
+      }
+    }, 'x', 0.5, 0, 3), [
+      {
+        pos: {
+          x: 0,
+          y: 0
+        },
+        size: {
+          x: 40,
+          y: 240
+        }
+      }, {
+        pos: {
+          x: 40,
+          y: 0
+        },
+        size: {
+          x: 40,
+          y: 240
+        }
+      }, {
+        pos: {
+          x: 80,
+          y: 0
+        },
+        size: {
+          x: 40,
+          y: 240
+        }
+      }
+    ], 0);
+  });
+  it('should split y', function() {
+    return eq(Tile.split_rect({
+      pos: {
+        x: 0,
+        y: 0
+      },
+      size: {
+        x: 120,
+        y: 240
+      }
+    }, 'y', 0.5, 0, 3), [
+      {
+        pos: {
+          x: 0,
+          y: 0
+        },
+        size: {
+          x: 120,
+          y: 80
+        }
+      }, {
+        pos: {
+          x: 0,
+          y: 80
+        },
+        size: {
+          x: 120,
+          y: 80
+        }
+      }, {
+        pos: {
+          x: 0,
+          y: 160
+        },
+        size: {
+          x: 120,
+          y: 80
+        }
+      }
+    ]);
+  });
+  it('should split non-evenly', function() {
+    return eq(Tile.split_rect({
+      pos: {
+        x: 0,
+        y: 0
+      },
+      size: {
+        x: 120,
+        y: 240
+      }
+    }, 'y', 0.1, 0, 3), [
+      {
+        pos: {
+          x: 0,
+          y: 0
+        },
+        size: {
+          x: 120,
+          y: 16
+        }
+      }, {
+        pos: {
+          x: 0,
+          y: 16
+        },
+        size: {
+          x: 120,
+          y: 144
+        }
+      }, {
+        pos: {
+          x: 0,
+          y: 160
+        },
+        size: {
+          x: 120,
+          y: 144
+        }
+      }
+    ]);
+  });
+  it('should split with a padding', function() {
+    return eq(Tile.split_rect({
+      pos: {
+        x: 0,
+        y: 0
+      },
+      size: {
+        x: 120,
+        y: 240
+      }
+    }, 'y', 0.5, 10, 3), [
+      {
+        pos: {
+          x: 0,
+          y: 0
+        },
+        size: {
+          x: 120,
+          y: 70
+        }
+      }, {
+        pos: {
+          x: 0,
+          y: 90
+        },
+        size: {
+          x: 120,
+          y: 70
+        }
+      }, {
+        pos: {
+          x: 0,
+          y: 170
+        },
+        size: {
+          x: 120,
+          y: 70
+        }
+      }
+    ]);
   });
 });
 

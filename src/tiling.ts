@@ -66,6 +66,14 @@ module Tiling {
 			removed = array.splice(start, 1)[0];
 			array.splice(end, 0, removed);
 			return array;
+		},
+
+		zip: function<T, U>(as: T[], bs: U[]): [T, U][] {
+			let cs = []
+			for (let i = 0; i < as.length && i < bs.length; i++) {
+				cs.push([as[i], bs[i]])
+			}
+			return cs
 		}
 	};
 
@@ -88,26 +96,40 @@ module Tiling {
 			};
 		}
 
-		static split_rect(rect:Rect, axis:string, ratio:number, padding:number): [Rect, Rect] {
+		static split_rect(rect:Rect, axis:string, ratio:number, padding:number, partitions: number): Rect[] {
 			var new_rect, new_size_a, new_size_b;
 			// this.log.debug("#split_rect: splitting rect of " + j(rect) + " along the " + axis + " axis with ratio " + ratio);
 			if (ratio > 1 || ratio < 0) {
 				throw "invalid ratio: " + ratio + " (must be between 0 and 1)";
 			}
-			new_size_a = Math.round(rect.size[axis] * ratio);
-			new_size_b = rect.size[axis] - new_size_a;
-			// this.log.debug("new_size_a = " + new_size_a + ", new_size_b = " + new_size_b + ", padding is " + padding);
-			padding = Math.round(Math.min(new_size_a / 2, new_size_b / 2, padding));
-			// this.log.debug("effective padding is " + padding);
-			new_rect = Tile.copy_rect(rect);
-			rect = Tile.copy_rect(rect);
-			rect.size[axis] = new_size_a - padding;
-			new_rect.size[axis] = new_size_b - padding;
-			new_rect.pos[axis] += new_size_a + padding;
+			if (partitions == 0) {
+				return []
+			}
+			if (partitions == 1) {
+				return [rect]
+			}
 
-			// this.log.debug("rect copy: " + j(rect));
-			// this.log.debug("new_rect: " + j(new_rect));
-			return [rect, new_rect];
+			let rects = [] as Rect[]
+			// This is the complex part: `ratio` is the ratio of the first partition to the first + second partition
+			// (for histerical reasons). So if we have more than 2 partitions we need to apply a scaling factor.
+			let size_left_two = (rect.size[axis] * 2) / partitions
+			let size_leftmost = Math.round(size_left_two * ratio)
+			let size_others = Math.round(size_left_two) - size_leftmost
+			padding = Math.round(Math.min(size_leftmost / 2, size_others / 2, padding))
+
+			{
+				new_rect = Tile.copy_rect(rect)
+				new_rect.size[axis] = size_leftmost - padding
+				rects.push(new_rect)
+			}
+
+			for (let i = 0; i < partitions - 1; i++) {
+				new_rect = Tile.copy_rect(rect)
+				new_rect.size[axis] = size_others - padding
+				new_rect.pos[axis] += size_leftmost + i * size_others + padding
+				rects.push(new_rect)
+			}
+			return rects
 		}
 
 		static add_diff_to_rect(rect:Rect, diff:Rect) {
@@ -644,7 +666,7 @@ module Tiling {
 				first_window.set_rect(rect);
 				return [{}, []];
 			}
-			_ref = Tile.split_rect(rect, this.axis, this.ratio, padding), window_rect = _ref[0], remaining = _ref[1];
+			_ref = Tile.split_rect(rect, this.axis, this.ratio, padding, 2), window_rect = _ref[0], remaining = _ref[1];
 			first_window.set_rect(window_rect);
 			return [remaining, windows];
 		}
@@ -656,8 +678,7 @@ module Tiling {
 
 	export interface SplitState {
 		main: MultiSplit
-		// TODO stop assuming 1 or 2 splits
-		splits: [Split[]] | [Split[], Split[]]
+		splits: Split[][]
 	}
 
 	export interface SplitStates {
@@ -672,33 +693,41 @@ module Tiling {
 
 		// number of leftmost windows. If 0, both the leftmost and second-left partition have 1 window. -ve values also supported. 
 		primary_windows: number
+		max_partitions: number
 		log = Logging.getLogger("shellshape.tiling.MultiSplit")
 
-		constructor(axis:string, primary_windows: number) {
+		constructor(axis:string, primary_windows: number, max_partitions: number) {
 			super(axis);
 			this.primary_windows = primary_windows;
+			this.max_partitions = max_partitions;
 		}
 	
-		split(bounds: Bounds, windows: WindowTile.BaseTiledWindow[], padding: number): [[Rect, WindowTile.BaseTiledWindow[]]] | [[Rect, WindowTile.BaseTiledWindow[]], [Rect, WindowTile.BaseTiledWindow[]]] {
+		split(bounds: Bounds, windows: WindowTile.BaseTiledWindow[], padding: number): [Rect, WindowTile.BaseTiledWindow[]][] {
 			var left_rect, left_windows, right_rect, right_windows;
 			this.save_last_rect(bounds);
 
 			let partitioned_windows = this.partition_windows(windows)
-			// TODO accomodate any number of partitions inc. 0
-			if (partitioned_windows.length == 2) {
-				let [left_rect, right_rect] = Tile.split_rect(bounds, this.axis, this.ratio, padding)
-				return [[left_rect, partitioned_windows[0]], [right_rect, partitioned_windows[1]]]
-			} else {
-				return [[bounds, windows]]
-			}
+
+			let rects = Tile.split_rect(bounds, this.axis, this.ratio, padding, partitioned_windows.length)
+			return ArrayUtil.zip(rects, partitioned_windows)
 		}
 
-		partition_windows(windows): [[WindowTile.BaseTiledWindow[]]] | [WindowTile.BaseTiledWindow[], WindowTile.BaseTiledWindow[]] {
-			if (this.primary_windows >= windows.length) {
-				return [windows]
-			} else {
-				return ArrayUtil.divide_after(this.primary_windows, windows);
+		partition_windows(windows): WindowTile.BaseTiledWindow[][] {
+			// Copy array in case we mess up state somewhere else
+			let partitioned = [] as WindowTile.BaseTiledWindow[][]
+			// note: misses out the rightmost partition
+			for (let i = 0; i < this.max_partitions - 1 && windows.length > 0; i++) {
+				// Increase number of windows per partition going from left to right
+				let take = Math.max(1, this.primary_windows + i)
+				var taken
+				[taken, windows] = ArrayUtil.divide_after(take, windows)
+				partitioned.push(taken)
 			}
+			// Everything remaining goes in the rightmost partition
+			if (windows.length > 0) {
+				partitioned.push(windows)
+			}
+			return partitioned
 		}
 	
 		in_primary_partition(idx) {

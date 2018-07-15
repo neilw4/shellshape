@@ -24,13 +24,12 @@ module Layout {
 			this.bounds = assert(bounds);
 			this.splits = {
 				'x': {
-					main: new Tiling.MultiSplit('x', 1),
-					// TODO change to dynamically expanding []
-					splits: [[]] as [Tiling.Split[]]
+					main: new Tiling.MultiSplit('x', 1, 2),
+					splits: [[]] as Tiling.Split[][]
 				},
 				'y': {
-					main: new Tiling.MultiSplit('y', 1),
-					splits: [[]] as [Tiling.Split[]]
+					main: new Tiling.MultiSplit('y', 1, 2),
+					splits: [[]] as Tiling.Split[][]
 				}
 			};
 		}
@@ -289,7 +288,7 @@ module Layout {
 	
 	export abstract class BaseTiledLayout extends BaseLayout {
 		main_split: Tiling.MultiSplit
-		splits: [Tiling.Split[]] | [Tiling.Split[], Tiling.Split[]]
+		splits: Tiling.Split[][]
 		main_axis: string
 
 		constructor(name, axis, state:LayoutState) {
