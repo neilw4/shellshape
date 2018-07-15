@@ -587,7 +587,12 @@ module Extension {
 					var pref = self.prefs.DEFAULT_PRIMARY_WINDOWS;
 					var update = function() {
 						var val = pref.get();
+						var previous_val = Layout.Default.primary_windows;
 						Layout.Default.primary_windows = val;
+						// Value has not been changed from the default, assume that the user wants to change it without restarting the shell
+						if (!initial && self.current_layout().get_main_window_count() == previous_val) {
+							self.current_layout().set_main_window_count(val);
+						}
 					};
 					Util.connect_and_track(self, pref.gsettings, 'changed::' + pref.key, update);
 					update();
@@ -598,7 +603,12 @@ module Extension {
 					var pref = self.prefs.DEFAULT_NUM_PARTITIONS;
 					var update = function() {
 						var val = pref.get();
+						var previous_val = Layout.Default.num_partitions;
 						Layout.Default.num_partitions = val;
+						// Value has not been changed from the default, assume that the user wants to change it without restarting the shell
+						if (!initial && self.current_layout().get_partition_count() == previous_val) {
+							self.current_layout().set_partition_count(val);
+						}
 					};
 					Util.connect_and_track(self, pref.gsettings, 'changed::' + pref.key, update);
 					update();
