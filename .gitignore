@@ -8,3 +8,4 @@
 /cruft
 /node_modules
 .sources
+.gup
