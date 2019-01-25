@@ -4,6 +4,16 @@
 
 I am no longer using or actively developing shellshape. I have focused my efforts on [slinger](https://github.com/timbertson/slinger), which I created as a simpler window management utility with many of the same benefits as shellshape, but with a fraction of the code, complexity and bugs. If anyone wishes to maintain shellshape (and fix said bugs ;)), please get in touch.
 
+### Note: updates by neilw4
+
+Branch multisplit_breaking has improvements and breaking changes over master. These include
+
+- Support for more than two columns
+- Change max number of columns using ctrl+shift+< or ctrl+shift+>
+- Windows in a column are equal size, not half the size of the window above
+- Update logic for deciding how many windows to add to a partition. Use ctrl+> to set number of leftmost-partitions to have exactly one window.
+- Breaking changes (and sometimes just breaks) to the padding logic
+
 # shellshape
 
 A tiling window manager extension for gnome-shell. Many tiling window managers are an all-or-nothing affair, shellshape allows you to tile your windows when it makes sense, and still provides powerful direct manipulation when you need it. You don't have to give up any of the gnome features you like, so it makes for a very smooth learning curve.
